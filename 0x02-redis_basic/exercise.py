@@ -48,8 +48,14 @@ def replay(func: Callable) -> None:
     input = r.lrange(key + ":inputs", 0, -1)
     output = r.lrange(key + ":outputs", 0, -1)
     for inp, out in zip(input, output):
-        inp = inp.decode("utf-8")
-        out = out.decode("utf-8")
+        try:
+            inp = inp.decode("utf-8")
+        except Exception:
+            inp = ""
+        try:
+            out = out.decode("utf-8")
+        except Exception:
+            out = ""
         print(f"{key}(*{inp}) -> {out}")
 
 
