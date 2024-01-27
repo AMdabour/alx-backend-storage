@@ -1,32 +1,33 @@
 #!/usr/bin/env python3
-""" Redis Module """
-
-from functools import wraps
+"""
+web cache and tracking how many times a particular URL was accessed
+"""
 import redis
 import requests
-from typing import Callable
+from functools import wraps
 
-redis_ = redis.Redis()
+r = redis.Redis()
 
 
-def count_requests(method: Callable) -> Callable:
-    """ Decortator for counting """
+def count_url_access(method):
+    """ Decorator counting how many times
+    a URL is accessed """
     @wraps(method)
-    def wrapper(url):  # sourcery skip: use-named-expression
-        """ Wrapper for decorator """
-        redis_.incr(f"count:{url}")
-        cached_html = redis_.get(f"cached:{url}")
-        if cached_html:
-            return cached_html.decode('utf-8')
+    def wrapper(url):
+        cached_key = "cached:" + url
+        cached_data = r.get(cached_key)
+        if cached_data:
+            return cached_data.decode("utf-8")
+        count_key = "count:" + url
+        r.incr(count_key)
         html = method(url)
-        redis_.setex(f"cached:{url}", 10, html)
+        r.setex(cached_key, 10, html)
         return html
-
     return wrapper
 
 
-@count_requests
+@count_url_access
 def get_page(url: str) -> str:
-    """ Obtain the HTML content of a  URL """
-    req = requests.get(url)
-    return req.text
+    """ Returns HTML content of a url """
+    result = requests.get(url)
+    return result.text
