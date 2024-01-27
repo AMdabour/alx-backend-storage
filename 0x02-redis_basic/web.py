@@ -21,7 +21,8 @@ def count_url_access(method):
         count_key = "count:" + url
         r.incr(count_key)
         html = method(url)
-        r.setex(cached_key, 10, html)
+        r.set(cached_key, html)
+        r.expire(cached_key, 10)
         return html
     return wrapper
 
