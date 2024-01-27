@@ -10,10 +10,10 @@ from uuid import uuid4
 
 class Cache():
     """Cache class"""
-    def __init__(self) -> None:
+    def __init__(self):
         """initializing the any instance of the class with
         redis client object"""
-        self._redis: Redis = Redis()
+        self._redis = Redis()
         self._redis.flushdb()
 
     def store(self, data: Union[str, bytes, int, float]) -> str:
